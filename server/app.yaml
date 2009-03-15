@@ -14,9 +14,11 @@ handlers:
 
 - url: /index.html
   script: main.py
+  login: required
 
 - url: /script.js
   script: main.py
+  login: required
 
 - url: /
   script: main.py

@@ -21,6 +21,10 @@ def check_if_valid_user():
     True if valid user.
   """
   user = users.get_current_user()
+  # This means that we forgot to protect a page
+  if user is None:
+    logging.error('got null current user...')
+    return False
   value = model.Author.get_by_key_name('key:%s' % user.email().lower()) is not None
   if not value:
     logging.debug('don\'t know: ' + user.email())
@@ -109,6 +113,9 @@ class BySubjectHandler(DataHandler):
 def ByDayHelper(when, order, limit, data_table, key_name, key):
   dateStr = when.strftime("%m/%d/%Y")
   date = model.Date.get_by_key_name('key:%s' % dateStr)
+  if date is None:
+    # No data for that day
+    return []
   msgs = date.messages.fetch(1000)
   results=dict()
   for msg in msgs:
@@ -131,6 +138,9 @@ def ByDayHelper(when, order, limit, data_table, key_name, key):
 
 def GetAuthorStats(author, count):
   oldest_msg = model.Message.gql('WHERE author = :1 ORDER BY __key__ ASC', author).get()
+  if oldest_msg is None:
+    logging.debug("couldn't find oldest msg for " + author.email)
+    return dict()
   daysonoxy = (datetime.date.today() - oldest_msg.date.date).days
   avg_posts_per_day = float(author.count) / float(daysonoxy)
   return dict(email=author.email,
