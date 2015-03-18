@@ -1,0 +1,1 @@
+Collect Stats on a mailbox
